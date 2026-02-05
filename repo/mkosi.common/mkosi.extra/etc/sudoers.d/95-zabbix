@@ -1,0 +1,2 @@
+Defaults:zabbix !syslog, !pam_session
+zabbix ALL= NOPASSWD:/usr/sbin/smartctl
