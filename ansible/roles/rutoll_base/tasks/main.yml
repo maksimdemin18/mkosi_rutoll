@@ -1,0 +1,87 @@
+---
+- name: Ensure home directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.owner }}"
+    mode: '0750'
+  loop:
+    - { path: /home/support, owner: support }
+    - { path: /home/tech, owner: tech }
+
+- name: Ensure ~/.ssh directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.owner }}"
+    mode: '0700'
+  loop:
+    - { path: /home/support/.ssh, owner: support }
+    - { path: /home/tech/.ssh, owner: tech }
+
+- name: Install authorized_keys for support (optional)
+  ansible.builtin.copy:
+    dest: /home/support/.ssh/authorized_keys
+    owner: support
+    group: support
+    mode: '0600'
+    content: "{{ support_authorized_keys | join('\n') }}\n"
+  when: support_authorized_keys | length > 0
+
+- name: Install authorized_keys for tech (optional)
+  ansible.builtin.copy:
+    dest: /home/tech/.ssh/authorized_keys
+    owner: tech
+    group: tech
+    mode: '0600'
+    content: "{{ tech_authorized_keys | join('\n') }}\n"
+  when: tech_authorized_keys | length > 0
+
+- name: Ensure services are enabled
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+  loop:
+    - ssh
+    - auditd
+
+- name: Ensure time sync is enabled (systemd-timesyncd)
+  ansible.builtin.systemd:
+    name: systemd-timesyncd
+    enabled: true
+  ignore_errors: true
+
+- name: Drop build metadata marker
+  ansible.builtin.copy:
+    dest: /etc/rutoll-image-build.txt
+    mode: '0644'
+    content: |
+      profile={{ rutoll_profile | default('unknown') }}
+      built_at={{ ansible_date_time.iso8601 }}
+      distro={{ ansible_distribution }} {{ ansible_distribution_version }}
+
+- name: Optional — install local .deb packages (mkosi.packages)
+  ansible.builtin.shell: |
+    set -euo pipefail
+    shopt -s nullglob
+
+    mkdir -p /opt/rutoll/packages
+
+    # mkosi versions differ in where PackageDirectories end up.
+    # We try several common locations.
+    for d in /mkosi.packages /var/tmp/mkosi/packages /var/tmp/mkosi.packages /work/mkosi.packages; do
+      if [ -d "$d" ]; then
+        cp -av "$d"/*.deb /opt/rutoll/packages/ 2>/dev/null || true
+      fi
+    done
+
+    if ls /opt/rutoll/packages/*.deb >/dev/null 2>&1; then
+      apt-get update
+      dpkg -i /opt/rutoll/packages/*.deb || apt-get -f install -y
+    else
+      echo "no local deb packages found"
+    fi
+  args:
+    executable: /bin/bash

@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo '[mkosi.postinst] Running post-install provisioning (Ansible)...'
+
+# mkosi may expose sources in different locations depending on version/settings.
+# We search for ansible/site.yml in common paths.
+find_repo() {
+  local candidates=(
+    /work
+    /work/src
+  )
+
+  for c in "${candidates[@]}"; do
+    if [[ -f "$c/ansible/site.yml" ]]; then
+      echo "$c"; return 0
+    fi
+  done
+
+  # fallback: one level deeper
+  if [[ -d /work/src ]]; then
+    local p
+    for p in /work/src/*; do
+      [[ -d "$p" ]] || continue
+      if [[ -f "$p/ansible/site.yml" ]]; then
+        echo "$p"; return 0
+      fi
+    done
+  fi
+
+  return 1
+}
+
+REPO_ROOT=""
+if REPO_ROOT="$(find_repo)"; then
+  echo "[mkosi.postinst] Repo root detected: $REPO_ROOT"
+else
+  echo '[mkosi.postinst] ERROR: cannot find ansible/site.yml in /work or /work/src'
+  exit 1
+fi
+
+# Install Ansible only for provisioning, then remove it.
+apt-get update
+apt-get install -y --no-install-recommends ansible
+
+# Determine active profile name from environment.
+# mkosi changed $PROFILE -> $PROFILES over time; support both.
+PROFILES_LIST="${PROFILES:-${PROFILE:-}}"
+PRIMARY_PROFILE="${PROFILES_LIST%% *}"
+ROLE="${PRIMARY_PROFILE:-base}"
+ROLE="${ROLE%-root-home}"
+ROLE="${ROLE%-root-var}"
+
+# docker profile uses the base role set
+if [[ "$ROLE" == "docker" ]]; then
+  ROLE="base"
+fi
+
+echo "[mkosi.postinst] Using ansible group: $ROLE (from profile: ${PRIMARY_PROFILE:-unknown})"
+
+cd "$REPO_ROOT/ansible"
+ansible-playbook -i inventory.ini site.yml --limit "$ROLE" -e "rutoll_profile=${PRIMARY_PROFILE:-unknown}"
+
+# Cleanup to keep images smaller
+apt-get purge -y ansible || true
+apt-get autoremove -y || true
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+
+echo '[mkosi.postinst] Done.'

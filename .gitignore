@@ -1,0 +1,14 @@
+# mkosi build output
+mkosi.output/
+mkosi.cache/
+_mkosi/
+
+# local overrides
+mkosi.local.conf
+
+# local deb packages
+mkosi.packages/*.deb
+
+# editor
+*.swp
+.DS_Store

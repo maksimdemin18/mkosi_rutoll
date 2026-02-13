@@ -1,0 +1,4 @@
+---
+- name: Turnpike placeholder
+  ansible.builtin.debug:
+    msg: "TODO: configure VNC/autostart and install cashier software (.deb)"

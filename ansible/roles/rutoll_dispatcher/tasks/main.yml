@@ -1,0 +1,4 @@
+---
+- name: Dispatcher placeholder
+  ansible.builtin.debug:
+    msg: "TODO: configure dispatcher software, NVIDIA settings if needed (.deb)"

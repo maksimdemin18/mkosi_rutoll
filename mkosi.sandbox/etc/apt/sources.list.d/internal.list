@@ -1,0 +1,2 @@
+# внутренний репозиторий
+deb [trusted=yes] http://apt.rutoll.local/ubuntu noble main

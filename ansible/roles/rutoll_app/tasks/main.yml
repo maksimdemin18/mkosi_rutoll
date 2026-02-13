@@ -1,0 +1,4 @@
+---
+- name: APP placeholder
+  ansible.builtin.debug:
+    msg: "TODO: install and configure APP software (.deb)"

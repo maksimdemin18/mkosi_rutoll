@@ -1,0 +1,37 @@
+---
+- name: RUTOLL image provisioning (mkosi)
+  hosts: all
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Show active profile
+      ansible.builtin.debug:
+        msg: "rutoll_profile={{ rutoll_profile | default('unknown') }}"
+
+  roles:
+    - role: rutoll_base
+
+- name: Controller-specific
+  hosts: controller
+  become: true
+  roles:
+    - role: rutoll_controller
+
+- name: App-specific
+  hosts: app
+  become: true
+  roles:
+    - role: rutoll_app
+
+- name: Turnpike/Cashier-specific
+  hosts: turnpike
+  become: true
+  roles:
+    - role: rutoll_turnpike
+
+- name: Dispatcher-specific
+  hosts: dispatcher
+  become: true
+  roles:
+    - role: rutoll_dispatcher

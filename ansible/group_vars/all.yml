@@ -1,0 +1,8 @@
+---
+# положить публичные SSH ключи для встроенных пользователей.
+# Пример:
+# support_authorized_keys:
+#   - "ssh-ed25519 AAAA... user@laptop"
+# tech_authorized_keys: []
+support_authorized_keys: []
+tech_authorized_keys: []

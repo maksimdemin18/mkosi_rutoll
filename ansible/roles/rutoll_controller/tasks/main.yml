@@ -1,0 +1,4 @@
+---
+- name: Controller placeholder
+  ansible.builtin.debug:
+    msg: "TODO: install and configure controller software (.deb)"

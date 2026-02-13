@@ -1,0 +1,10 @@
+# Скопируйте в mkosi.local.conf и меняйте под себя (этот файл будет в .gitignore)
+[Build]
+# Пример прокси:
+# Environment=HTTP_PROXY=http://proxy.local:3128
+# Environment=HTTPS_PROXY=http://proxy.local:3128
+# Environment=NO_PROXY=localhost,127.0.0.1,.rutoll.local
+
+[Content]
+# Если хотите включить внутренний APT-репозиторий в сборке — раскомментируйте:
+# SandboxTrees=mkosi.sandbox

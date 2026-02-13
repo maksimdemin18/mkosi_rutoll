@@ -1,0 +1,3 @@
+---
+# Example: override NVIDIA driver package name
+# nvidia_driver_package: nvidia-driver-550
