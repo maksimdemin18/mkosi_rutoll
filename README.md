@@ -7,7 +7,6 @@
 
 ---
 
-## Что вы получите
 
 ### 1) Диск-образ (bootable) для установки на железо/VM
 
@@ -32,7 +31,7 @@ docker run --rm -it rutoll/noble:latest bash
 
 ---
 
-## Супер-быстрый старт (для новичка)
+## быстрый старт
 
 ### Шаг 0. Скачайте репозиторий
 
@@ -57,7 +56,7 @@ cd mkosi_rutoll
 
 ---
 
-## Типы образов (профили)
+## Типы образов
 
 Профиль выбирается командой:
 ```bash
@@ -80,7 +79,7 @@ mkosi build --profile <profile>
 
 ---
 
-## Где класть ваши .deb
+## Где класть .deb
 
 Вариант A (самый простой):
 1) положить `.deb` в `mkosi.packages/`
@@ -94,14 +93,14 @@ mkosi build --profile <profile>
 
 ## Внутренний APT-репозиторий
 
-Если пакеты берёте из внутреннего репозитория:
+Если пакеты из внутреннего репозитория:
 
 1) отредактируйте:
 ```
 mkosi.sandbox/etc/apt/sources.list.d/internal.list
 ```
 
-2) создайте локальный файл (не коммитится в git):
+2) создайте локальный файл:
 ```bash
 cp mkosi.local.conf.example mkosi.local.conf
 ```
@@ -139,7 +138,7 @@ SandboxTrees=mkosi.sandbox
 
 ---
 
-## Где менять логику установки ваших сервисов
+## Где менять логику установки сервисов
 
 Ansible роли:
 - `ansible/roles/rutoll_base`
@@ -148,14 +147,4 @@ Ansible роли:
 - `ansible/roles/rutoll_turnpike`
 - `ansible/roles/rutoll_dispatcher`
 
-Сейчас там **плейсхолдеры** — вы добавляете реальные таски установки и настройки ваших пакетов.
-
 ---
-
-## Сборка “как в CI” (подход)
-
-Обычно делается так:
-- merge в main → nightly build `base`
-- tag `vX.Y.Z` → build всех профилей
-- артефакты складываются в внутренний storage/registry
-
